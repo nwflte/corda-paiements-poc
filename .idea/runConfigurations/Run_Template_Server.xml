@@ -7,11 +7,11 @@
       <env name="config.rpc.username" value="user1" />
       <env name="config.rpc.password" value="test" />
     </envs>
-    <option name="MAIN_CLASS_NAME" value="com.template.webserver.Starter" />
-    <module name="com.template.clients.main" />
+    <option name="MAIN_CLASS_NAME" value="com.octo.webserver.Starter" />
+    <module name="corda-poc.clients.main" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="com.template.webserver.*" />
+        <option name="PATTERN" value="com.octo.webserver.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

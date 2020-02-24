@@ -1,7 +1,7 @@
-package com.template;
+package com.octo;
 
 import com.google.common.collect.ImmutableList;
-import com.template.flows.Responder;
+import com.octo.flows.Responder;
 import net.corda.testing.node.MockNetwork;
 import net.corda.testing.node.MockNetworkParameters;
 import net.corda.testing.node.StartedMockNode;
@@ -12,8 +12,8 @@ import org.junit.Test;
 
 public class FlowTests {
     private final MockNetwork network = new MockNetwork(new MockNetworkParameters(ImmutableList.of(
-        TestCordapp.findCordapp("com.template.contracts"),
-        TestCordapp.findCordapp("com.template.flows")
+        TestCordapp.findCordapp("com.octo.contracts"),
+        TestCordapp.findCordapp("com.octo.flows")
     )));
     private final StartedMockNode a = network.createNode();
     private final StartedMockNode b = network.createNode();

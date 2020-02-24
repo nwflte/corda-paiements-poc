@@ -1,6 +1,6 @@
-package com.template.states;
+package com.octo.states;
 
-import com.template.contracts.TemplateContract;
+import com.octo.contracts.TemplateContract;
 import net.corda.core.contracts.BelongsToContract;
 import net.corda.core.contracts.ContractState;
 import net.corda.core.identity.AbstractParty;

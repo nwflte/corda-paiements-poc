@@ -1,4 +1,4 @@
-package com.template;
+package com.octo;
 
 import net.corda.client.rpc.CordaRPCClient;
 import net.corda.core.messaging.CordaRPCOps;
