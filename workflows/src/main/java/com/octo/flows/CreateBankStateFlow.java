@@ -8,6 +8,9 @@ import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
 
+import java.time.Duration;
+import java.time.Instant;
+
 // ******************
 // * Initiator flow *
 // ******************
@@ -51,12 +54,13 @@ public class CreateBankStateFlow extends FlowLogic<SignedTransaction> {
         Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
 
         progressTracker.setCurrentStep(GENERATING_TRANSACTION);
-        BankBalanceState bankBalanceState = new BankBalanceState(bank, amount);
+        BankBalanceState bankBalanceState = new BankBalanceState(bank, getOurIdentity(), amount);
 
         progressTracker.setCurrentStep(SIGNING_TRANSACTION);
         TransactionBuilder builder = new TransactionBuilder(notary)
                 .addOutputState(bankBalanceState, BankBalanceContract.ID)
-                .addCommand(new BankBalanceContract.BankBalanceCommands.CentralBankCreates(), getOurIdentity().getOwningKey());
+                .addCommand(new BankBalanceContract.BankBalanceCommands.CentralBankCreates(), getOurIdentity().getOwningKey())
+                .setTimeWindow(Instant.now(), Duration.ofSeconds(10));
 
         progressTracker.setCurrentStep(FINALISING_TRANSACTION);
         return subFlow(new VerifySignAndFinaliseFlow(builder));
