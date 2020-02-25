@@ -17,10 +17,10 @@ import java.util.List;
 public class BankBalanceState implements LinearState {
 
     private final Party bank;
-    private final Amount<Currency> amount;
+    private final Integer amount;
     private final UniqueIdentifier linearId;
 
-    public BankBalanceState(Party bank, Amount<Currency> amount) {
+    public BankBalanceState(Party bank, Integer amount) {
         this.bank = bank;
         this.amount = amount;
         this.linearId = new UniqueIdentifier();
@@ -31,19 +31,19 @@ public class BankBalanceState implements LinearState {
         return Arrays.asList(bank);
     }
 
-    public BankBalanceState increase(Amount<Currency> value){
-        return new BankBalanceState(bank, amount.plus(value));
+    public BankBalanceState increase(Integer value){
+        return new BankBalanceState(bank, amount + value);
     }
 
-    public BankBalanceState decrease(Amount<Currency> value){
-        return new BankBalanceState(bank, amount.minus(value));
+    public BankBalanceState decrease(Integer value){
+        return new BankBalanceState(bank, amount - value);
     }
 
     public Party getBank() {
         return bank;
     }
 
-    public Amount<Currency> getAmount() {
+    public Integer getAmount() {
         return amount;
     }
 

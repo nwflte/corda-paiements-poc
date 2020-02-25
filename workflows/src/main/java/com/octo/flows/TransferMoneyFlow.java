@@ -4,7 +4,6 @@ import co.paralleluniverse.fibers.Suspendable;
 import com.google.common.collect.ImmutableList;
 import com.octo.contracts.BankBalanceContract;
 import com.octo.states.BankBalanceState;
-import net.corda.core.contracts.Amount;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.flows.FlowException;
 import net.corda.core.flows.FlowLogic;
@@ -14,18 +13,17 @@ import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
 
-import java.util.Currency;
 import java.util.List;
 
 public class TransferMoneyFlow extends FlowLogic<SignedTransaction> {
     private final Party otherBank;
     // private final UniqueIdentifier linearId;
-    private final Amount<Currency> amount;
+    private final Integer amount;
     // private final Amount<Currency> amount;
 
     private final ProgressTracker progressTracker = new ProgressTracker();
 
-    public TransferMoneyFlow(Party otherBank, Amount<Currency> amount) {
+    public TransferMoneyFlow(Party otherBank, Integer amount) {
         this.otherBank = otherBank;
         this.amount = amount;
     }

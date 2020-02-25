@@ -67,7 +67,7 @@ public class BankBalanceContract implements Contract {
                 );
 
                 require.using("The balance should stay positive after decrease",
-                        outs.stream().allMatch(out -> out.getAmount().getQuantity() >= 0)
+                        outs.stream().allMatch(out -> out.getAmount().intValue() >= 0)
                         );
 
                 return null;
