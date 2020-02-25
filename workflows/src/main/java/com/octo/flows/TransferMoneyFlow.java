@@ -7,6 +7,8 @@ import com.octo.states.BankBalanceState;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.flows.FlowException;
 import net.corda.core.flows.FlowLogic;
+import net.corda.core.flows.InitiatingFlow;
+import net.corda.core.flows.StartableByRPC;
 import net.corda.core.identity.Party;
 import net.corda.core.node.services.vault.QueryCriteria;
 import net.corda.core.transactions.SignedTransaction;
@@ -15,6 +17,8 @@ import net.corda.core.utilities.ProgressTracker;
 
 import java.util.List;
 
+@InitiatingFlow
+@StartableByRPC
 public class TransferMoneyFlow extends FlowLogic<SignedTransaction> {
     private final Party otherBank;
     // private final UniqueIdentifier linearId;
