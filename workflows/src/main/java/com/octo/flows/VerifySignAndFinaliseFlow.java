@@ -1,5 +1,6 @@
 package com.octo.flows;
 
+import co.paralleluniverse.fibers.Suspendable;
 import net.corda.core.flows.FinalityFlow;
 import net.corda.core.flows.FlowException;
 import net.corda.core.flows.FlowLogic;
@@ -14,6 +15,7 @@ public class VerifySignAndFinaliseFlow extends FlowLogic<SignedTransaction> {
     }
 
     @Override
+    @Suspendable
     public SignedTransaction call() throws FlowException {
         transactionBuilder.verify(getServiceHub());
         SignedTransaction signedTransaction = getServiceHub().signInitialTransaction(transactionBuilder);

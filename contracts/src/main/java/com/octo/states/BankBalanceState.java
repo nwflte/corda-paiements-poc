@@ -13,16 +13,18 @@ import java.util.List;
 // * State *
 // *********
 @BelongsToContract(BankBalanceContract.class)
-public class BankBalanceState implements ContractState {
+public class BankBalanceState implements LinearState {
 
     private final Party bank;
     private final Party issuer;
     private final Integer amount;
+    private final UniqueIdentifier linearId;
 
     public BankBalanceState(Party bank, Party issuer, Integer amount) {
         this.bank = bank;
         this.issuer = issuer;
         this.amount = amount;
+        this.linearId = new UniqueIdentifier();
     }
 
     @Override
@@ -49,5 +51,11 @@ public class BankBalanceState implements ContractState {
 
     public Party getIssuer() {
         return issuer;
+    }
+
+    @NotNull
+    @Override
+    public UniqueIdentifier getLinearId() {
+        return linearId;
     }
 }

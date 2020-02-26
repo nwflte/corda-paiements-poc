@@ -1,5 +1,6 @@
 package com.octo.flows;
 
+import co.paralleluniverse.fibers.Suspendable;
 import com.octo.contracts.BankBalanceContract;
 import com.octo.states.BankBalanceState;
 import net.corda.core.flows.*;
@@ -50,6 +51,7 @@ public class CreateBankStateFlow extends FlowLogic<SignedTransaction> {
     }
 
     @Override
+    @Suspendable
     public SignedTransaction call() throws FlowException {
         Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
 
@@ -59,8 +61,7 @@ public class CreateBankStateFlow extends FlowLogic<SignedTransaction> {
         progressTracker.setCurrentStep(SIGNING_TRANSACTION);
         TransactionBuilder builder = new TransactionBuilder(notary)
                 .addOutputState(bankBalanceState, BankBalanceContract.ID)
-                .addCommand(new BankBalanceContract.BankBalanceCommands.CentralBankCreates(), getOurIdentity().getOwningKey())
-                .setTimeWindow(Instant.now(), Duration.ofSeconds(10));
+                .addCommand(new BankBalanceContract.BankBalanceCommands.CentralBankCreates(), getOurIdentity().getOwningKey());
 
         progressTracker.setCurrentStep(FINALISING_TRANSACTION);
         return subFlow(new VerifySignAndFinaliseFlow(builder));
