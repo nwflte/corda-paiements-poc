@@ -1,18 +1,3 @@
-<p align="center">
-  <img src="https://www.corda.net/wp-content/uploads/2016/11/fg005_corda_b.png" alt="Corda" width="500">
-</p>
-
-# CorDapp Template - Java
-
-Welcome to the Java CorDapp template. The CorDapp template is a stubbed-out CorDapp that you can use to bootstrap 
-your own CorDapps.
-
-**This is the Java version of the CorDapp template. The Kotlin equivalent is 
-[here](https://github.com/corda/cordapp-template-kotlin/).**
-
-# Pre-Requisites
-
-See https://docs.corda.net/getting-set-up.html.
 
 # Usage
 
@@ -34,10 +19,19 @@ If you would prefer to use the built in IntelliJ JUnit test runner, you can run 
 copy your quasar JAR file to the lib directory. You will then need to specify ``-javaagent:lib/quasar.jar``
 and set the run directory to the project root directory for each test.
 
-## Running the nodes
+## Testing Examples
 
-See https://docs.corda.net/tutorial-cordapp.html#running-the-example-cordapp.
-
+1 - Build the nodes by running ``.\gradlew clean deployNodes`` from project root directory.\
+2 - Run the nodes using ``.\runnodes.bat`` from build\nodes directory. (For Linux : ./runnodes)\
+3 - After some time, a window for each node should be ready, you can start flows and query the vault...\
+	- Creating a Bank Balance for the 2 banks from Central Bank node:\
+		``start com.octo.flows.CreateBankStateFlow bank: "BankA", amount: 10000``\
+		``start com.octo.flows.CreateBankStateFlow bank: "BankB", amount: 5000``\
+	- Query to see if states are added (from Central Bank, BankA or BankB nodes):\
+		 ``run vaultQuery contractStateType: com.octo.states.BankBalanceState``\
+	- Make transfer from one bank to another (Example from BankA node to BankB):\
+		``start com.octo.flows.TransferMoneyFlow otherBank: "BankB", amount: 5000``\
+		
 ## Interacting with the nodes
 
 ### Shell
@@ -130,13 +124,3 @@ While the sole template endpoint is served on:
 
     http://localhost:10050/templateendpoint
     
-# Extending the template
-
-You should extend this template as follows:
-
-* Add your own state and contract definitions under `contracts/src/main/java/`
-* Add your own flow definitions under `workflows/src/main/java/`
-* Extend or replace the client and webserver under `clients/src/main/java/`
-
-For a guided example of how to extend this template, see the Hello, World! tutorial 
-[here](https://docs.corda.net/hello-world-introduction.html).
