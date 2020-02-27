@@ -1,6 +1,19 @@
 
 # Usage
 
+## Testing Examples
+
+1 - Build the nodes by running ``.\gradlew clean deployNodes`` from project root directory.\
+2 - Run the nodes using ``.\runnodes.bat`` from build\nodes directory. (For Linux : ./runnodes)\
+3 - After some time, a window for each node should be ready, you can start flows and query the vault...\
+	- Creating a Bank Balance for the 2 banks from Central Bank node:\
+		``start com.octo.flows.CreateBankStateFlow bank: "BankA", amount: 10000``\
+		``start com.octo.flows.CreateBankStateFlow bank: "BankB", amount: 5000``\
+	- Query to see if states are added (from Central Bank, BankA or BankB nodes):\
+		 ``run vaultQuery contractStateType: com.octo.states.BankBalanceState``\
+	- Make transfer from one bank to another (Example from BankA node to BankB):\
+		``start com.octo.flows.TransferMoneyFlow otherBank: "BankB", amount: 5000``
+		
 ## Running tests inside IntelliJ
 	
 We recommend editing your IntelliJ preferences so that you use the Gradle runner - this means that the quasar utils
@@ -19,18 +32,6 @@ If you would prefer to use the built in IntelliJ JUnit test runner, you can run 
 copy your quasar JAR file to the lib directory. You will then need to specify ``-javaagent:lib/quasar.jar``
 and set the run directory to the project root directory for each test.
 
-## Testing Examples
-
-1 - Build the nodes by running ``.\gradlew clean deployNodes`` from project root directory.\
-2 - Run the nodes using ``.\runnodes.bat`` from build\nodes directory. (For Linux : ./runnodes)\
-3 - After some time, a window for each node should be ready, you can start flows and query the vault...\
-	- Creating a Bank Balance for the 2 banks from Central Bank node:\
-		``start com.octo.flows.CreateBankStateFlow bank: "BankA", amount: 10000``\
-		``start com.octo.flows.CreateBankStateFlow bank: "BankB", amount: 5000``\
-	- Query to see if states are added (from Central Bank, BankA or BankB nodes):\
-		 ``run vaultQuery contractStateType: com.octo.states.BankBalanceState``\
-	- Make transfer from one bank to another (Example from BankA node to BankB):\
-		``start com.octo.flows.TransferMoneyFlow otherBank: "BankB", amount: 5000``\
 		
 ## Interacting with the nodes
 
