@@ -18,25 +18,23 @@ public class BankTransferContract implements Contract {
 
     @Override
     public void verify(@NotNull LedgerTransaction tx) throws IllegalArgumentException {
-verifyAll(tx);
+        verifyAll(tx);
     }
 
     private void verifyAll(LedgerTransaction tx) {
-        CommandWithParties<BankTransferContract.BankTransferCommands> command =
-                requireSingleCommand(tx.getCommands(), BankTransferContract.BankTransferCommands.class);
-        BankTransferContract.BankTransferCommands commandType = command.getValue();
+        final BankTransferCommands command = tx.findCommand(BankTransferCommands.class, cmd -> true).getValue();
 
-        if(commandType instanceof BankTransferContract.BankTransferCommands.CentralBankApproval)
+        if(command instanceof BankTransferCommands.CentralBankApproval)
             verifyCentralBankApproval(tx, command);
-        if(commandType instanceof BankTransferContract.BankTransferCommands.TransferMoney)
+        if(command instanceof BankTransferCommands.TransferMoney)
             verifyTransfer(tx, command);
     }
 
-    private void verifyCentralBankApproval(LedgerTransaction tx, CommandWithParties<BankTransferContract.BankTransferCommands> command) {
+    private void verifyCentralBankApproval(LedgerTransaction tx, BankTransferCommands command) {
 
     }
 
-    private void verifyTransfer(LedgerTransaction tx, CommandWithParties<BankTransferContract.BankTransferCommands> command) {
+    private void verifyTransfer(LedgerTransaction tx, BankTransferCommands command) {
         /*requireThat(require -> {
             require.using("A transfer should have 2 output states",
                     tx.getOutputs().size() == 2);
@@ -65,7 +63,7 @@ verifyAll(tx);
     }
 
     public interface BankTransferCommands extends CommandData {
-        class TransferMoney implements BankBalanceContract.BankBalanceCommands {}
-        class CentralBankApproval implements BankBalanceContract.BankBalanceCommands {}
+        class TransferMoney implements BankTransferCommands {}
+        class CentralBankApproval implements BankTransferCommands {}
     }
 }

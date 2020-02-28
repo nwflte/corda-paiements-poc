@@ -1,6 +1,7 @@
 package com.octo.contracts;
 
 import com.octo.states.BankBalanceState;
+import net.corda.core.contracts.Command;
 import net.corda.core.contracts.CommandData;
 import net.corda.core.contracts.CommandWithParties;
 import net.corda.core.contracts.Contract;
@@ -26,18 +27,17 @@ public class BankBalanceContract implements Contract {
     }
 
     private void verifyAll(LedgerTransaction tx) {
-        CommandWithParties<BankBalanceCommands> command =  requireSingleCommand(tx.getCommands(), BankBalanceCommands.class);
-        BankBalanceCommands commandType = command.getValue();
-        if(commandType instanceof BankBalanceCommands.CentralBankCreates)
+        /*final BankBalanceCommands command =  tx.findCommand(BankBalanceCommands.class, cmd -> true).getValue();
+        if(command instanceof BankBalanceCommands.CentralBankCreates)
             verifyCentralBankCreates(tx, command);
-        if(commandType instanceof BankBalanceCommands.CentralBankApproval)
-            verifyCentralBankApproval(tx, command);
+        if(command instanceof BankBalanceCommands.CentralBankApproval)
+            verifyCentralBankApproval(tx, command);*/
     }
 
-    private void verifyCentralBankApproval(LedgerTransaction tx, CommandWithParties<BankBalanceCommands> command) {
+    private void verifyCentralBankApproval(LedgerTransaction tx, BankBalanceCommands command) {
 
     }
-    private void verifyCentralBankCreates(LedgerTransaction tx, CommandWithParties<BankBalanceCommands> command) {
+    private void verifyCentralBankCreates(LedgerTransaction tx, BankBalanceCommands command) {
         requireThat(require -> {
             require.using("A bank balance creation should not consume any input states", tx.getInputs().isEmpty());
             require.using("A bank balance creation should only create one output state", tx.getOutputs().size() == 1);
