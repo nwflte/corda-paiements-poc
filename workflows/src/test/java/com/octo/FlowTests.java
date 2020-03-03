@@ -1,10 +1,7 @@
 package com.octo;
 
 import com.google.common.collect.ImmutableList;
-import net.corda.testing.node.MockNetwork;
-import net.corda.testing.node.MockNetworkParameters;
-import net.corda.testing.node.StartedMockNode;
-import net.corda.testing.node.TestCordapp;
+import net.corda.testing.node.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +11,7 @@ public class FlowTests {
         TestCordapp.findCordapp("com.octo.contracts"),
         TestCordapp.findCordapp("com.octo.flows")
     )));
+
     private final StartedMockNode a = network.createNode();
     private final StartedMockNode b = network.createNode();
 
