@@ -2,12 +2,13 @@ package com.octo.flows;
 
 import co.paralleluniverse.fibers.Suspendable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.octo.contracts.BankBalanceContract;
 import com.octo.contracts.BankTransferContract;
 import com.octo.states.BankBalanceState;
 import com.octo.states.BankTransferState;
-import net.corda.core.contracts.Command;
 import net.corda.core.contracts.StateAndRef;
+import net.corda.core.crypto.SecureHash;
 import net.corda.core.flows.*;
 import net.corda.core.identity.Party;
 import net.corda.core.node.services.Vault;
@@ -63,49 +64,63 @@ public class TransferMoneyFlow{
         @Suspendable
         @Override
         public SignedTransaction call() throws FlowException {
+            // Get Notary
             Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
 
             progressTracker.setCurrentStep(GENERATING_TRANSACTION);
+            // Query to Get Balance State
             QueryCriteria queryCriteria = new QueryCriteria.LinearStateQueryCriteria(ImmutableList.of(getOurIdentity()),
                     null, null, Vault.StateStatus.UNCONSUMED);
             List<StateAndRef<BankBalanceState>> inputStateAndRefs = getServiceHub().getVaultService()
                     .queryBy(BankBalanceState.class, queryCriteria).getStates();
 
-            if(inputStateAndRefs.isEmpty())
+            if (inputStateAndRefs.isEmpty())
                 throw new IllegalStateException("No balance state corresponding to sending bank");
             StateAndRef<BankBalanceState> thisBankInputStateAndRef = inputStateAndRefs.get(0);
 
             BankBalanceState inputBankBalanceState = thisBankInputStateAndRef.getState().getData();
 
-            BankTransferState outputBankTransferState = new BankTransferState(getOurIdentity(), otherBank, amount);
+            // Initiate flow with other parties
+            final FlowSession otherBankSession = initiateFlow(otherBank);
+            final FlowSession centralBankSession = initiateFlow(inputBankBalanceState.getIssuer());
+
+            // Send signing flag to parties
+            otherBankSession.send(true);
+            centralBankSession.send(false);
 
             // Get the other bank to create the output BankBlanaceState (Increase it's balance by amount)
-            final FlowSession otherBankSession = initiateFlow(otherBank);
             final BankBalanceState otherBankBalanceState = otherBankSession.
                     sendAndReceive(BankBalanceState.class, amount).unwrap(wrappedBankBalance -> wrappedBankBalance);
 
-            // final StateAndRef<BankBalanceState> otherBankInputStateAndRef = otherBankSession.
-            //        receive(StateAndRef.class).unwrap(wrapped -> wrapped);
+            final StateAndRef<BankBalanceState> otherBankInputStateAndRef = otherBankSession.
+                    receive(StateAndRef.class).unwrap(wrapped -> wrapped);
 
-            // Create the Command
+            // Create Signers List
             final List<PublicKey> requiredSigners = ImmutableList.of(getOurIdentity().getOwningKey(), otherBank.getOwningKey());
-            final Command<BankTransferContract.BankTransferCommands> txCommand =
-                    new Command<>(new BankTransferContract.BankTransferCommands.TransferMoney(), requiredSigners);
 
             progressTracker.setCurrentStep(SIGNING_TRANSACTION);
             TransactionBuilder builder = new TransactionBuilder(notary)
                     .addInputState(thisBankInputStateAndRef)
+                    .addInputState(otherBankInputStateAndRef)
                     .addOutputState(inputBankBalanceState.decrease(amount), BankBalanceContract.ID)
                     .addOutputState(otherBankBalanceState, BankBalanceContract.ID)
-                    .addOutputState(outputBankTransferState, BankTransferContract.ID)
+                    .addOutputState(new BankTransferState(getOurIdentity(), otherBank, amount), BankTransferContract.ID)
                     .addCommand(new BankTransferContract.BankTransferCommands.TransferMoney(), requiredSigners);
 
+
             progressTracker.setCurrentStep(FINALISING_TRANSACTION);
-            builder.verify(getServiceHub());
+
+            // builder.verify(getServiceHub());
             final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(builder);
-            final SignedTransaction fullySignedTx = subFlow(new CollectSignaturesFlow(partSignedTx,
+            otherBankSession.send(partSignedTx);
+
+            SignedTransaction returnedTx = subFlow(new ReceiveTransactionFlow(otherBankSession, false));
+
+            final SignedTransaction fullySignedTx = subFlow(new CollectSignaturesFlow(returnedTx,
                     ImmutableList.of(otherBankSession), CollectSignaturesFlow.Companion.tracker()));
-            return subFlow(new FinalityFlow(fullySignedTx));
+
+            SignedTransaction finalityTx = subFlow(new FinalityFlow(fullySignedTx, ImmutableSet.of(otherBankSession, centralBankSession)));
+            return finalityTx;
         }
     }
 
@@ -120,35 +135,51 @@ public class TransferMoneyFlow{
         @Override
         @Suspendable
         public SignedTransaction call() throws FlowException {
-            final Integer amount = counterPartySession.receive(Integer.class).unwrap(wrappedInt -> wrappedInt);
+            final boolean needsToSignTransaction = counterPartySession.receive(Boolean.class).unwrap(bool -> bool);
 
-            Party otherParty = counterPartySession.getCounterparty();
+            if (needsToSignTransaction) {
+                // Receive amount from sender bank
+                final Integer amount = counterPartySession.receive(Integer.class).unwrap(wrappedInt -> wrappedInt);
 
-            QueryCriteria queryCriteria = new QueryCriteria.LinearStateQueryCriteria(ImmutableList.of(getOurIdentity()),
-                    null, null, Vault.StateStatus.UNCONSUMED);
-            List<StateAndRef<BankBalanceState>> inputStateAndRefs = getServiceHub().getVaultService()
-                    .queryBy(BankBalanceState.class, queryCriteria).getStates();
+                Party otherParty = counterPartySession.getCounterparty();
 
-            if(inputStateAndRefs.isEmpty())
-                throw new IllegalStateException("No balance state corresponding to receiving bank");
-            StateAndRef<BankBalanceState> thisBankInputStateAndRef = inputStateAndRefs.get(0);
+                QueryCriteria queryCriteria = new QueryCriteria.LinearStateQueryCriteria(ImmutableList.of(getOurIdentity()),
+                        null, null, Vault.StateStatus.UNCONSUMED);
+                List<StateAndRef<BankBalanceState>> inputStateAndRefs = getServiceHub().getVaultService()
+                        .queryBy(BankBalanceState.class, queryCriteria).getStates();
 
-            BankBalanceState outputBankBalanceState = thisBankInputStateAndRef.getState().getData().increase(amount);
+                if (inputStateAndRefs.isEmpty())
+                    throw new IllegalStateException("No balance state corresponding to receiving bank");
+                StateAndRef<BankBalanceState> thisBankInputStateAndRef = inputStateAndRefs.get(0);
 
-            counterPartySession.send(outputBankBalanceState);
+                BankBalanceState outputBankBalanceState = thisBankInputStateAndRef.getState().getData().increase(amount);
 
-            return subFlow(new CheckTransactionAndSignFlow(outputBankBalanceState, counterPartySession,
-                    SignTransactionFlow.Companion.tracker()));
+                counterPartySession.send(outputBankBalanceState);
+
+                counterPartySession.send(thisBankInputStateAndRef);
+
+                SignedTransaction signedTx = counterPartySession.receive(SignedTransaction.class).unwrap(wrappedTx -> wrappedTx);
+                subFlow(new SendTransactionFlow(counterPartySession, signedTx));
+
+                final SecureHash txId = subFlow(new CheckTransactionAndSignFlow(outputBankBalanceState, thisBankInputStateAndRef, counterPartySession,
+                        SignTransactionFlow.Companion.tracker())).getId();
+                getLogger().debug("This is bank B");
+                return subFlow(new ReceiveFinalityFlow(counterPartySession, txId));
+            }
+            getLogger().debug("This is central bank");
+            return subFlow(new ReceiveFinalityFlow(counterPartySession));
         }
 
 
         public static class CheckTransactionAndSignFlow extends SignTransactionFlow {
             private final BankBalanceState expectedBankBalanceState;
+            private final StateAndRef<BankBalanceState> thisBankInputStateAndRef;
 
-            CheckTransactionAndSignFlow(BankBalanceState expectedBankBalanceState, FlowSession otherPartyFlow,
-                                        ProgressTracker progressTracker){
+            CheckTransactionAndSignFlow(BankBalanceState expectedBankBalanceState, StateAndRef<BankBalanceState> thisBankInputStateAndRef, FlowSession otherPartyFlow,
+                                        ProgressTracker progressTracker) {
                 super(otherPartyFlow, progressTracker);
                 this.expectedBankBalanceState = expectedBankBalanceState;
+                this.thisBankInputStateAndRef = thisBankInputStateAndRef;
             }
 
             @Override
@@ -160,6 +191,7 @@ public class TransferMoneyFlow{
                 }
 
             }
+
         }
     }
 
