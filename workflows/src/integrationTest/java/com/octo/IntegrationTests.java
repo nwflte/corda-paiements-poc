@@ -1,39 +1,31 @@
 package com.octo;
 
 
-import com.octo.contracts.BankTransferContract;
 import com.octo.flows.CreateBankStateFlow;
 import com.octo.flows.TransferMoneyFlow;
 import com.octo.states.BankBalanceState;
 import net.corda.client.rpc.CordaRPCClient;
 import net.corda.core.concurrent.CordaFuture;
-import net.corda.core.contracts.StateAndRef;
 import net.corda.core.identity.CordaX500Name;
 import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.node.services.Vault;
-import net.corda.core.utilities.OpaqueBytes;
-import net.corda.finance.contracts.asset.Cash;
-import net.corda.finance.flows.CashIssueAndPaymentFlow;
 import net.corda.testing.driver.DriverParameters;
 import net.corda.testing.driver.NodeHandle;
 import net.corda.testing.driver.NodeParameters;
 import net.corda.testing.node.User;
-import org.apache.shiro.crypto.hash.Hash;
 import org.junit.Test;
 import rx.Observable;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static net.corda.node.services.Permissions.invokeRpc;
+import static net.corda.node.services.Permissions.startFlow;
 import static net.corda.testing.core.ExpectKt.expect;
 import static net.corda.testing.core.ExpectKt.expectEvents;
 import static net.corda.testing.driver.Driver.driver;
-import static net.corda.testing.node.internal.InternalTestUtilsKt.FINANCE_CORDAPPS;
-import static net.corda.node.services.Permissions.startFlow;
 import static org.junit.Assert.assertEquals;
 
 
@@ -48,18 +40,18 @@ public class IntegrationTests {
         .withStartNodesInProcess(true)
                 ,dsl -> {
 
-            User centralBankUser = new User("user1", "password", new HashSet<>(asList(
-                    startFlow(CreateBankStateFlow.class), invokeRpc("vaultTrack")
-            )));
+                    User centralBankUser = new User("user1", "test", new HashSet<>(asList(
+                            startFlow(CreateBankStateFlow.class), invokeRpc("vaultTrack")
+                    )));
 
 
-            User bankAUser = new User("user1", "password", new HashSet<>(asList(
-                    startFlow(TransferMoneyFlow.Initiator.class), invokeRpc("vaultTrack")
-            )));
+                    User bankAUser = new User("user1", "test", new HashSet<>(asList(
+                            startFlow(TransferMoneyFlow.Initiator.class), invokeRpc("vaultTrack")
+                    )));
 
-            User bankBUser = new User("user1", "password", new HashSet<>(asList(
-                    startFlow(TransferMoneyFlow.Responder.class), invokeRpc("vaultTrack")
-            )));
+                    User bankBUser = new User("user1", "test", new HashSet<>(asList(
+                            startFlow(TransferMoneyFlow.Responder.class), invokeRpc("vaultTrack")
+                    )));
 
             try {
                 List<CordaFuture<NodeHandle>> nodeHandleFutures = asList(
