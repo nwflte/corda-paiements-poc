@@ -1,7 +1,9 @@
 package com.octo.states;
 
 import com.octo.contracts.BankBalanceContract;
-import net.corda.core.contracts.*;
+import net.corda.core.contracts.BelongsToContract;
+import net.corda.core.contracts.LinearState;
+import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.Party;
 import org.jetbrains.annotations.NotNull;
