@@ -1,7 +1,7 @@
 
 # Usage
 
-## Testing Examples
+## Testing Examples using node shell
 
 1 - Build the nodes by running ``.\gradlew clean deployNodes`` from project root directory.\
 2 - Run the nodes using ``.\runnodes.bat`` from build\nodes directory. (For Linux : ./runnodes)\
@@ -14,6 +14,17 @@
 	- Make transfer from one bank to another (Example from BankA node to BankB):\
 		``start com.octo.flows.TransferMoneyFlow otherBank: "BankB", amount: 5000``
 		
+## Building Docker nodes
+
+1 - Run ``.\gradlew clean prepareDockerNodes`` from project root directory.\
+2 - You will find a docker-compose.yml in build/nodes directory, it should be modified:\
+	A - Modify image from ``corda/corda-zulu-4.3`` to ``corda/corda-zulu-java1.8-4.3``\
+	B - Modify mapped ports to expose other ports, You can find a provided docker-compose.yml in root folder and just copy the 		ports.\
+	C - Run ``docker-compose up`` to run nodes.\
+	D - After starting, you can connect to shell to test flows using SSH, \
+		for example run ``ssh localhost -p 22036 -l user1``, then enter password ``test`` to run Central Bank node.\
+	Note: The port used to connect to SSH is the host port we mapped in docker-compose file to port 22022 of the container.\
+	Note 2: If the after running ``docker-compose up`` the containers take so long to start, give more resources to Docker.
 ## Running tests inside IntelliJ
 	
 We recommend editing your IntelliJ preferences so that you use the Gradle runner - this means that the quasar utils
