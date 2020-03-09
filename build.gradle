@@ -192,6 +192,18 @@ task prepareDockerNodes(type: net.corda.plugins.Dockerform, dependsOn: ['jar']) 
     }
 }
 
+task buildCordaImage(type: Exec){
+	dependsOn ':contracts:jar'
+	dependsOn 'workflows:jar'
+	copy {
+		from 'contracts/build/libs/contracts-0.1.jar'
+		from 'workflows/build/libs/workflows-0.1.jar'
+		into 'corda-poc-docker/build/cordapp'
+	}
+	workingDir 'corda-poc-docker/'
+	commandLine 'docker', 'build', '-t', 'corda-poc/poc:0.1', '.'
+}
+
 task installQuasar(type: Copy) {
     destinationDir rootProject.file("lib")
     from(configurations.quasar) {
