@@ -201,7 +201,7 @@ task buildCordaImage(type: Exec){
 		into 'corda-poc-docker/build/cordapp'
 	}
 	workingDir 'corda-poc-docker/'
-	commandLine 'docker', 'build', '-t', 'corda-poc/poc:0.1', '.'
+	commandLine 'docker', 'build', '-t', 'naoufal450/corda-poc:0.1', '.'
 }
 
 task installQuasar(type: Copy) {

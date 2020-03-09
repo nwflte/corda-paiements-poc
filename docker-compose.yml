@@ -1,73 +1,12 @@
-#This file is provided just for example and will not work on your machine
-#Volumes are created by gradle plugin, you can copy the ports mapping
 version: '3'
 services:
-  notary:
-    volumes:
-      - C:\dev\corda-poc\build\docker\Notary/node.conf:/etc/corda/node.conf
-      - C:\dev\corda-poc\build\docker\Notary/certificates:/opt/corda/certificates
-      - C:\dev\corda-poc\build\docker\Notary/logs:/opt/corda/logs
-      - C:\dev\corda-poc\build\docker\Notary/persistence:/opt/corda/persistence
-      - C:\dev\corda-poc\build\docker\Notary/cordapps:/opt/corda/cordapps
-      - C:\dev\corda-poc\build\docker\Notary/network-parameters:/opt/corda/network-parameters
-      - C:\dev\corda-poc\build\docker\Notary/additional-node-infos:/opt/corda/additional-node-infos
-      - C:\dev\corda-poc\build\docker\Notary/drivers:/opt/corda/drivers
-    ports:
-      - "10002:10002"
-      - "10003:10003"
-      - "10043:10043"
-      - "22022:22022"
-      - "10005:10005"
-    image: corda/corda-zulu-java1.8-4.3
   banka:
+    image: naoufal450/corda-poc:0.1
     volumes:
-      - C:\dev\corda-poc\build\docker\BankA/node.conf:/etc/corda/node.conf
-      - C:\dev\corda-poc\build\docker\BankA/certificates:/opt/corda/certificates
-      - C:\dev\corda-poc\build\docker\BankA/logs:/opt/corda/logs
-      - C:\dev\corda-poc\build\docker\BankA/persistence:/opt/corda/persistence
-      - C:\dev\corda-poc\build\docker\BankA/cordapps:/opt/corda/cordapps
-      - C:\dev\corda-poc\build\docker\BankA/network-parameters:/opt/corda/network-parameters
-      - C:\dev\corda-poc\build\docker\BankA/additional-node-infos:/opt/corda/additional-node-infos
-      - C:\dev\corda-poc\build\docker\BankA/drivers:/opt/corda/drivers
+      - C:/certificates:/opt/corda/certificates # Cetificates folder (from build/nodes/<node-name>/certificates)
+      - C:/config:/etc/corda # config folder contains node.conf file (from build/nodes/<node-name>/node.conf)
+      - C:/network-parameters:/opt/corda/network-parameters # File from build/nodes/<node-name>/network-parameters
+      - C:/additional-node-infos:/opt/corda/additional-node-infos # Folder from build/nodes/<node-name>/additional-node-infos
     ports:
-      - "10004:10002"
-      - "10006:10003"
-      - "10046:10043"
-      - "22024:22022"
-      - "10011:10005"
-    image: corda/corda-zulu-java1.8-4.3
-  bankb:
-    volumes:
-      - C:\dev\corda-poc\build\docker\BankB/node.conf:/etc/corda/node.conf
-      - C:\dev\corda-poc\build\docker\BankB/certificates:/opt/corda/certificates
-      - C:\dev\corda-poc\build\docker\BankB/logs:/opt/corda/logs
-      - C:\dev\corda-poc\build\docker\BankB/persistence:/opt/corda/persistence
-      - C:\dev\corda-poc\build\docker\BankB/cordapps:/opt/corda/cordapps
-      - C:\dev\corda-poc\build\docker\BankB/network-parameters:/opt/corda/network-parameters
-      - C:\dev\corda-poc\build\docker\BankB/additional-node-infos:/opt/corda/additional-node-infos
-      - C:\dev\corda-poc\build\docker\BankB/drivers:/opt/corda/drivers
-    ports:
-      - "10008:10002"
-      - "10012:10003"
-      - "10052:10043"
-      - "22028:22022"
-      - "10020:10005"
-    image: corda/corda-zulu-java1.8-4.3
-  centralbank:
-    volumes:
-      - C:\dev\corda-poc\build\docker\CentralBank/node.conf:/etc/corda/node.conf
-      - C:\dev\corda-poc\build\docker\CentralBank/certificates:/opt/corda/certificates
-      - C:\dev\corda-poc\build\docker\CentralBank/logs:/opt/corda/logs
-      - C:\dev\corda-poc\build\docker\CentralBank/persistence:/opt/corda/persistence
-      - C:\dev\corda-poc\build\docker\CentralBank/cordapps:/opt/corda/cordapps
-      - C:\dev\corda-poc\build\docker\CentralBank/network-parameters:/opt/corda/network-parameters
-      - C:\dev\corda-poc\build\docker\CentralBank/additional-node-infos:/opt/corda/additional-node-infos
-      - C:\dev\corda-poc\build\docker\CentralBank/drivers:/opt/corda/drivers
-    ports:
-      - "10016:10002"
-      - "10024:10003"
-      - "10064:10043"
-      - "22036:22022"
-      - "10040:10005"
-    image: corda/corda-zulu-java1.8-4.3
-    
+      - "22022:22022"
+      - "10003:10003"
